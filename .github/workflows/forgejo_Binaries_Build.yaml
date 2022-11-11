@@ -1,0 +1,63 @@
+name: 🔨 Forgejo Binaries Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    steps:
+      - name: Clone Forgejo repository
+        uses: actions/checkout@v3
+        with:
+          repository: 'forgejo/forgejo'
+          fetch-depth: 1
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Build
+        run: |
+          go build -v -o forgejo_${{ matrix.os }}
+        
+      - name: Test
+        run: go test -v ./...
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: forgejo_${{ matrix.os }}
+          path: forgejo_${{ matrix.os }}
+
+      - name: Generate SHA256
+        run: |
+          sha256sum forgejo_${{ matrix.os }} > forgejo_${{ matrix.os }}.sha256
+        shell: bash
+
+      - name: Upload SHA256
+        uses: actions/upload-artifact@v4
+        with:
+          name: forgejo_${{ matrix.os }}_sha256
+          path: forgejo_${{ matrix.os }}.sha256
+
+      - name: Clean up
+        if: always()
+        run: |
+          rm -rf forgejo_${{ matrix.os }} forgejo_${{ matrix.os }}.sha256
+        shell: bash

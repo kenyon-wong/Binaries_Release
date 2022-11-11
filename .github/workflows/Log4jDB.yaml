@@ -1,0 +1,68 @@
+name: "CodeQL"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+      packages: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: java
+        queries: security-extended,security-and-quality
+
+    - name: Build Log4j Database
+      run: |
+        git clone https://github.com/apache/logging-log4j2.git
+        cd logging-log4j2
+        git checkout be881e5
+        # 使用 xmlstarlet 来修改 pom.xml，这样可以保证 XML 格式的正确性
+        sudo apt-get update && sudo apt-get install -y xmlstarlet
+        xmlstarlet ed -L -d "//module[text()='log4j-layout-template-json']" -d "//module[text()='log4j-core-its']" -d "//module[text()='log4j-1.2-api']" -d "//module[text()='log4j-slf4j-impl']" -d "//module[text()='log4j-slf4j18-impl']" -d "//module[text()='log4j-to-slf4j']" -d "//module[text()='log4j-jcl']" -d "//module[text()='log4j-flume-ng']" -d "//module[text()='log4j-taglib']" -d "//module[text()='log4j-jmx-gui']" -d "//module[text()='log4j-samples']" -d "//module[text()='log4j-bom']" -d "//module[text()='log4j-jdbc-dbcp2']" -d "//module[text()='log4j-jpa']" -d "//module[text()='log4j-couchdb']" -d "//module[text()='log4j-mongodb3']" -d "//module[text()='log4j-mongodb4']" -d "//module[text()='log4j-cassandra']" -d "//module[text()='log4j-web']" -d "//module[text()='log4j-perf']" -d "//module[text()='log4j-iostreams']" -d "//module[text()='log4j-jul']" -d "//module[text()='log4j-jpl']" -d "//module[text()='log4j-liquibase']" -d "//module[text()='log4j-appserver']" -d "//module[text()='log4j-osgi']" -d "//module[text()='log4j-docker']" -d "//module[text()='log4j-kubernetes']" -d "//module[text()='log4j-spring-boot']" -d "//module[text()='log4j-spring-cloud-config']" pom.xml
+        mvn clean install -Dmaven.test.skip=true
+        cd ..
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:java"
+
+    - name: Upload CodeQL database
+      uses: actions/upload-artifact@v3
+      with:
+        name: codeql-database
+        path: ${{ github.workspace }}/results
+
+    - name: Upload CodeQL queries
+      run: |
+        CODEQL_QUERIES=$(find ${{ github.workspace }}/.github/codeql -name '*.ql')
+        if [ -n "$CODEQL_QUERIES" ]; then
+          mkdir -p codeql-queries
+          cp $CODEQL_QUERIES codeql-queries/
+        else
+          echo "No .ql files found in .github/codeql directory"
+        fi
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: codeql-queries
+        path: codeql-queries

@@ -1,0 +1,53 @@
+name: 🔨 Build and Test Massdns on macOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: ${{ runner.os }}-brew-${{ hashFiles('**/Brewfile') }}
+          restore-keys: |
+            ${{ runner.os }}-brew-
+
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install cmake libuv openssl zlib
+
+      - name: Build Massdns
+        run: |
+          git clone --depth 1 https://github.com/blechschmidt/massdns.git
+          cd massdns
+          make -j$(sysctl -n hw.ncpu)
+
+      - name: Run Massdns tests
+        run: |
+          cd massdns
+          echo "docs.brew.sh" > domains.txt
+          ./bin/massdns -r resolvers.txt -t AAAA -w results.txt domains.txt
+
+      - name: Check test results
+        run: |
+          cd massdns
+          if grep -q "docs.brew.sh" results.txt; then
+            echo "Test passed: docs.brew.sh found in results"
+          else
+            echo "Test failed: docs.brew.sh not found in results"
+            exit 1
+          fi
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: massdns/results.txt

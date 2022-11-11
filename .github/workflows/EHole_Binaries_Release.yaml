@@ -1,0 +1,62 @@
+name: 🔨 EHole Binaries Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+
+      - name: Clone EHole repository
+        uses: actions/checkout@v3
+        with:
+          repository: 'EdgeSecurityTeam/EHole'
+          path: EHole
+
+      - name: Build
+        run: |
+          cd EHole
+          go build -v -o ../ehole_${{ matrix.os }}
+        
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ehole_${{ matrix.os }}
+          path: ehole_${{ matrix.os }}
+
+  package:
+    name: Package Binaries
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    steps:
+      - name: Download binary
+        uses: actions/download-artifact@v3
+        with:
+          name: ehole_${{ matrix.os }}
+          path: binaries/${{ matrix.os }}
+
+      - name: Zip binary
+        run: |
+          cd binaries
+          zip -r ehole_${{ matrix.os }}.zip ${{ matrix.os }}
+
+      - name: Upload packaged artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ehole_packaged_${{ matrix.os }}
+          path: binaries/ehole_${{ matrix.os }}.zip
