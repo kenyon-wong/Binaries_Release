@@ -1,0 +1,31 @@
+name: 🔨 EHole_Binaries_Build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Test Builds
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+
+      - name: clone
+        run: |
+            git clone https://github.com/EdgeSecurityTeam/EHole.git
+      - name: Build
+        run: go build -o ehole_${{ matrix.os }} . 
+        working-directory: EHole
+
+      - name: Push changes
+        uses: actions/upload-artifact@v2
+        with:
+          name: echole_release
+          path: EHole/ehole_${{ matrix.os }}
