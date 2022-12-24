@@ -1,0 +1,31 @@
+name: 🔨 forgejo_Binaries_Build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Test Builds
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+
+      - name: clone
+        run: |
+            git clone --depth 1 https://codeberg.org/forgejo/forgejo.git
+      - name: Build
+        run: go build -o forgejo_${{ matrix.os }} . 
+        working-directory: forgejo
+
+      - name: Push changes
+        uses: actions/upload-artifact@v2
+        with:
+          name: forgejo_release
+          path: forgejo/forgejo_${{ matrix.os }}
