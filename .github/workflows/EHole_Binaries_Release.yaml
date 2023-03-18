@@ -2,7 +2,9 @@ name: 🔨 EHole_Binaries_Build
 
 on:
   push:
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -31,6 +33,12 @@ jobs:
         with:
           name: ehole_${{ matrix.os }}
           path: EHole/ehole_${{ matrix.os }}
+
+      - name: Validate artifact
+        uses: dawidd6/action-download-artifact@v1
+        with:
+          name: ehole_${{ matrix.os }}
+          path: binaries
 
   package:
     name: Package Binaries
