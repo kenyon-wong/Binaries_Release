@@ -1,4 +1,5 @@
 name: 🔨 EHole_Binaries_Build
+
 on:
   push:
   pull_request:
@@ -20,12 +21,42 @@ jobs:
       - name: clone
         run: |
             git clone https://github.com/EdgeSecurityTeam/EHole.git
+
       - name: Build
         run: go build -o ehole_${{ matrix.os }} . 
         working-directory: EHole
 
-      - name: Push changes
+      - name: Upload binaries
         uses: actions/upload-artifact@v2
         with:
-          name: echole_release
+          name: ehole_${{ matrix.os }}
           path: EHole/ehole_${{ matrix.os }}
+
+  package:
+    name: Package Binaries
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: ehole_*
+          path: binaries
+      
+      - name: Create directory
+        run: |
+          mkdir -p binaries/${{ matrix.os }}
+          mv binaries/ehole_${{ matrix.os }} binaries/${{ matrix.os }}/ehole_${{ matrix.os }}
+        working-directory: ${{ github.workspace }}
+
+      - name: Zip binaries
+        run: |
+          cd binaries/
+          zip -r ehole_binaries_${{ matrix.os }}.zip ${{ matrix.os }}/ 
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ehole_binaries_${{ matrix.os }}
+          path: binaries/ehole_binaries_${{ matrix.os }}.zip
