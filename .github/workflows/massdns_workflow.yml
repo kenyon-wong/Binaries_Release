@@ -19,17 +19,24 @@ jobs:
         run: |
           ls.exe -Al
           pwd.exe
+
       - name: Clone repository
         run: git clone https://github.com/blechschmidt/massdns.git
 
+      # - name: Build massdns
+      #   run: |
+      #     chmod -R a+rw massdns
+      #     cd massdns && make nolinux
+
       - name: Get Cygwin bash path
-        run: echo "CYGWIN_BASH=$(cygpath -u /usr/bin/bash.exe)" >> $GITHUB_ENV
+        run: |
+          echo "CYGWIN_BASH=$(cygpath -u /usr/bin/bash.exe)" >> $GITHUB_ENV
 
       - name: Build massdns
         run: |
-        	chmod -R a+rw massdns
-        	$CYGWIN_BASH -c "cd massdns && make nolinux"
-        	
+          chmod -R a+rw massdns
+          $GITHUB_ENV -c "cd massdns && make nolinux"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
