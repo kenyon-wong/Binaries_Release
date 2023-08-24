@@ -8,7 +8,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    permissions: administrator
 
     steps:
       - name: Set Git line endings to Unix-style
