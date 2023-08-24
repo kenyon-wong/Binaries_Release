@@ -25,10 +25,12 @@ jobs:
       - name: Clone repository
         run: git clone https://github.com/blechschmidt/massdns.git
 
+      - name: Set file permissions
+        run: icacls massdns /grant Everyone:(F) /T
+
       - name: Build massdns
         run: |
-          chmod -R a+rw massdns
-          C:\\cygwin\bin\bash.exe -c "cd massdns && make nolinux"
+          C:\\cygwin\\bin\\bash.exe -c "cd massdns && make nolinux"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
