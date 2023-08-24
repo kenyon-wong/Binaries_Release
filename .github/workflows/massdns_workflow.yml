@@ -1,4 +1,4 @@
-name: Windows Build
+name: Windows Build Workflow
 
 on:
   workflow_dispatch:
@@ -8,6 +8,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      - name: Clone repository and set file permissions
+        run: |
+          git clone https://github.com/blechschmidt/massdns.git
+          powershell.exe -Command "Get-ChildItem -Recurse -Path massdns | ForEach-Object { $_.FullName; $acl = Get-Acl -Path $_.FullName; $acl.AddAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule('Everyone','FullControl','ContainerInherit,ObjectInherit','None','Allow'))); Set-Acl -Path $_.FullName -AclObject $acl }"
+
       - name: Set Git line endings to Unix-style
         run: git config --global core.autocrlf input
 
@@ -20,18 +25,15 @@ jobs:
           site: http://mirrors.kernel.org/sourceware/cygwin/
           add-to-path: true
 
-      - name: Clone repository
-        run: git clone https://github.com/blechschmidt/massdns.git
-
-      - name: Set file permissions
-        run: powershell.exe -Command "Get-ChildItem -Recurse -Path massdns | ForEach-Object { $_.FullName; $acl = Get-Acl -Path $_.FullName; $acl.AddAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule('Everyone','FullControl','ContainerInherit,ObjectInherit','None','Allow'))); Set-Acl -Path $_.FullName -AclObject $acl }"
-
       - name: Build massdns
         run: |
           C:\\cygwin\\bin\\bash.exe -c "cd massdns && make nolinux"
 
-      - name: Upload artifact
+      - name: Upload massdns artifact
         uses: actions/upload-artifact@v2
         with:
           name: massdns
           path: massdns/bin/massdns.exe
+          
+      - name: Clean up
+        run: Remove-Item -Path massdns -Force -Recurse
