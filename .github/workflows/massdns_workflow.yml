@@ -1,46 +1,44 @@
-name: Windows Build
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  build:
-    runsname: Build and Upload Massdns for Windows x64
+name: Build and Upload Massdns for Windows x64
 
 on:
   workflow_dispatch:  # 手动触发工作流程
 
 jobs:
   build_and_upload:
-    runs-on: windows-latest  # 使用 Windows 环境
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Git and Chocolatey
+    - name: Set up Cygwin
       run: |
-        choco install git -y
         git config --global core.autocrlf input
-        choco install chocolatey -y
-        refreshenv
-
-    - name: Install Cygwin
-      run: |
-        choco install cyg-get -y
-        cyg-get install make wget unzip -q
+        sudo apt-get update
+        sudo apt-get install -y build-essential
+        sudo apt-get install -y git
+        sudo apt-get install -y make
+        sudo apt-get install -y autoconf
+        sudo apt-get install -y automake
+        sudo apt-get install -y libtool
+        sudo apt-get install -y wget
+        sudo apt-get install -y unzip
+        wget https://cygwin.com/setup-x86_64.exe
+        chmod +x setup-x86_64.exe
+        ./setup-x86_64.exe --quiet-mode --packages make,git,wget,unzip
 
     - name: Build Massdns
       run: |
         git clone https://github.com/blechschmidt/massdns.git
         cd massdns
-        chmod +x massdns/scripts/subbrute.py  # 确保脚本可执行权限
         make nolinux
+
+    - name: Copy binaries
+      run: |
+        cp massdns/bin/massdns.exe $GITHUB_WORKSPACE/massdns-x64.exe
 
     - name: Upload binaries
       uses: actions/upload-artifact@v2
       with:
         name: massdns-binaries
-        path: massdns/bin/massdns.exe
+        path: $GITHUB_WORKSPACE/massdns-x64.exe
