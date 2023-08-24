@@ -1,0 +1,31 @@
+name: Windows Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Set up Cygwin
+        uses: actions/setup-cygwin@v1
+        with:
+          packages: gcc-core, git, make
+
+      - name: Clone repository
+        run: git clone https://github.com/blechschmidt/massdns.git
+
+      - name: Build
+        run: |
+          cd massdns
+          make
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Upload
+          path: bin/massdns.exe
+
+      # Add additional steps as needed for testing, deployment, etc.
