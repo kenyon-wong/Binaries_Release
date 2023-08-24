@@ -25,6 +25,7 @@ jobs:
 
       - name: Build massdns
         run: |
+          chmod -R 775 massdns
           cd massdns
           make nolinux
 
