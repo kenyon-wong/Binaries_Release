@@ -7,6 +7,11 @@ jobs:
   build:
     runs-on: windows-latest
 
+    env:
+      CFLAGS: -O3
+      CXXFLAGS: -O3
+      LDFLAGS: -s
+
     steps:
       - name: 配置 Cygwin
         uses: egor-tensin/setup-cygwin@v4
