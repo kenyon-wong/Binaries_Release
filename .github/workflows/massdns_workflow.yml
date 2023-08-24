@@ -13,7 +13,7 @@ jobs:
       - name: "Windows: Cygwin download"
         if: runner.os == 'Windows'
           run: |
-          Invoke-WebRequest 'https://cygwin.com/setup-x86_64.exe' -OutFile 'setup-x86_64.exe'
+            Invoke-WebRequest 'https://cygwin.com/setup-x86_64.exe' -OutFile 'setup-x86_64.exe'
 
       - name: "Windows: Cygwin setup"
         if: runner.os == 'Windows'
