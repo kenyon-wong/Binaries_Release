@@ -27,8 +27,7 @@ jobs:
         run: |
           chmod -R a+rw massdns
           ls -al
-          sudo chmod
-          chmod -R a+rw massdns
+          sudo chmod -R a+rw massdns
           ls -al
           cd massdns
           make nolinux
