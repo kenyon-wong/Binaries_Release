@@ -22,23 +22,13 @@ jobs:
           site: http://mirrors.kernel.org/sourceware/cygwin/
           add-to-path: true
 
-      - name: Check Cygwin installation
-        run: |
-          ls -Al
-          pwd
-          cygcheck -c cygwin
-          gcc -v
-          g++ -v
-          make -v
-          gdb -v
-
       - name: Clone repository
         run: git clone https://github.com/blechschmidt/massdns.git
 
       - name: Build massdns
         run: |
           chmod -R a+rw massdns
-          cd massdns && make nolinux
+          C:\\cygwin\bin\bash.exe -c "cd massdns && make nolinux"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
