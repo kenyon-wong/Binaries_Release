@@ -26,7 +26,11 @@ jobs:
         run: |
           ls.exe -Al
           pwd.exe
-          bash -o igncr -e tests/script.sh
+          cygcheck -c cygwin
+          gcc –v          
+          g++ --version
+          make –version
+          gdb –version
 
       - name: Clone repository
         run: git clone https://github.com/blechschmidt/massdns.git
