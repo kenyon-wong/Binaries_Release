@@ -25,7 +25,7 @@ jobs:
 
       - name: Build massdns
         run: |
-          sudo chmod -R a+rw massdns
+          chmod -R a+rw massdns
           /usr/bin/bash -c "cd massdns && make nolinux"
 
       - name: Upload artifact
