@@ -1,0 +1,40 @@
+name: massdns Build for windows
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+
+    - name: Set up Cygwin
+      uses: egor-tensin/setup-cygwin@v4
+      with:
+        packages: cmake gcc-g++
+
+    - name: Check Cygwin installation
+      run: |
+        ls.exe -Al
+        pwd.exe
+
+    - name: Clone repository
+      run: git clone https://github.com/blechschmidt/massdns.git
+        
+    - name: Set permissions
+      run: chmod -R 775 massdns
+            
+    - name: Build massdns
+      run: | 
+        /usr/bin/bash -c "cd massdns && make"
+        
+    - name: Upload artifact 
+     uses: actions/upload-artifact@v2
+     with:
+       name: massdns
+       path: massdns/bin/massdns.exe
