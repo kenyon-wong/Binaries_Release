@@ -26,7 +26,7 @@ jobs:
         run: git clone https://github.com/blechschmidt/massdns.git
 
       - name: Set file permissions
-        run: icacls massdns /grant Everyone:(OI)(CI)F /T
+        run: powershell.exe -Command "Get-ChildItem -Recurse -Path massdns | ForEach-Object { $_.FullName; $acl = Get-Acl -Path $_.FullName; $acl.AddAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule('Everyone','FullControl','ContainerInherit,ObjectInherit','None','Allow'))); Set-Acl -Path $_.FullName -AclObject $acl }"
 
       - name: Build massdns
         run: |
