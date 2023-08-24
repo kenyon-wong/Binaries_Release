@@ -15,25 +15,15 @@ jobs:
         with:
           packages: cmake gcc-g++
 
-      # Cygwin executables are added to PATH, so you can call them directly:
-      - run: |
+      - name: Check Cygwin installation
+        run: |
           ls.exe -Al
           pwd.exe
-
-      # Alternatively, you can set Cygwin's bash as the shell to use:
-      - run: |
-          # This is a real bash script!
-          basic() {
-              ls -Al
-              pwd
-          }
-          basic
-        shell: C:\tools\cygwin\bin\bash.exe --login --norc -eo pipefail -o igncr '{0}'
 
       - name: Clone repository
         run: git clone https://github.com/blechschmidt/massdns.git
 
-      - name: Build
+      - name: Build massdns
         run: |
           cd massdns
           make
