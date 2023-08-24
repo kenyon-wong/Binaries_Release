@@ -26,9 +26,7 @@ jobs:
       - name: Build massdns
         run: |
           cd massdns
-          chmod +x configure
-          ./configure
-          make
+          make nolinux
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
