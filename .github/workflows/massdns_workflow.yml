@@ -10,10 +10,16 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Set up Cygwin
-        uses: actions/setup-cygwin@v1
-        with:
-          packages: gcc-core, git, make
+      - name: "Windows: Cygwin download"
+        if: runner.os == 'Windows'
+          run: |
+          Invoke-WebRequest 'https://cygwin.com/setup-x86_64.exe' -OutFile 'setup-x86_64.exe'
+
+      - name: "Windows: Cygwin setup"
+        if: runner.os == 'Windows'
+        # The setup does not complete properly in powershell for some reason
+        shell: cmd
+        run: .\setup-x86_64.exe --quiet-mode --site http://cygwin.mirror.constant.com --symlink-type=sys --packages mingw64-i686-binutils=2.37-2,mingw64-x86_64-binutils=2.37-2,curl,diffutils,git,m4,make,mercurial,mingw64-i686-gcc-core,mingw64-i686-gcc-g++,mingw64-x86_64-gcc-core,mingw64-x86_64-gcc-g++,patch,perl,rsync,unzip
 
       - name: Clone repository
         run: git clone https://github.com/blechschmidt/massdns.git
