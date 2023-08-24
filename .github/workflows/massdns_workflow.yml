@@ -7,33 +7,40 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runsname: Build and Upload Massdns for Windows x64
+
+on:
+  workflow_dispatch:  # 手动触发工作流程
+
+jobs:
+  build_and_upload:
+    runs-on: windows-latest  # 使用 Windows 环境
 
     steps:
-      - name: Set Git line endings to Unix-style
-        run: git config --global core.autocrlf input
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Cygwin
-        uses: cygwin/cygwin-install-action@v4
-        with:
-          platform: x86_64
-          packages: cmake gcc-g++
-          install-dir: C:\\cygwin
-          site: http://mirrors.kernel.org/sourceware/cygwin/
-          add-to-path: true
+    - name: Set up Git and Chocolatey
+      run: |
+        choco install git -y
+        git config --global core.autocrlf input
+        choco install chocolatey -y
+        refreshenv
 
-      - name: Clone repository
-        run: git clone https://github.com/blechschmidt/massdns.git
+    - name: Install Cygwin
+      run: |
+        choco install cyg-get -y
+        cyg-get install make wget unzip -q
 
-      - name: Set file permissions
-        run: powershell.exe -Command "Get-ChildItem -Recurse -Path massdns | ForEach-Object { $_.FullName; $acl = Get-Acl -Path $_.FullName; $acl.AddAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule('Everyone','FullControl','ContainerInherit,ObjectInherit','None','Allow'))); Set-Acl -Path $_.FullName -AclObject $acl }"
+    - name: Build Massdns
+      run: |
+        git clone https://github.com/blechschmidt/massdns.git
+        cd massdns
+        chmod +x massdns/scripts/subbrute.py  # 确保脚本可执行权限
+        make nolinux
 
-      - name: Build massdns
-        run: |
-          C:\\cygwin\\bin\\bash.exe -c "cd massdns && make nolinux"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: massdns
-          path: massdns/bin/massdns.exe
+    - name: Upload binaries
+      uses: actions/upload-artifact@v2
+      with:
+        name: massdns-binaries
+        path: massdns/bin/massdns.exe
