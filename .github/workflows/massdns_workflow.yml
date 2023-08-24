@@ -24,14 +24,11 @@ jobs:
       - name: 克隆仓库
         run: git clone https://github.com/blechschmidt/massdns.git
 
-      - name: 设置环境变量
-        run: echo "::set-env name=CFLAGS::"
-
       - name: 构建 massdns
         run: |
           cd massdns
           mkdir bin
-          gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -O3 -std=c11 -Wall -fstack-protector-strong src/main.c -o bin/massdns.exe
+          gcc $(CPPFLAGS) $(LDFLAGS) -O3 -std=c11 -Wall -fstack-protector-strong src/main.c -o bin/massdns.exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
