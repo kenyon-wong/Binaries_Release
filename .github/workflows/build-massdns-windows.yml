@@ -31,7 +31,7 @@ jobs:
           gcc -O3 -std=c11 -Wall -fstack-protector-strong src/main.c -o bin/massdns.exe
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@master
         with:
           name: massdns
           path: massdns/bin/massdns.exe
