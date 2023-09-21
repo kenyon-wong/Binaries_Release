@@ -17,6 +17,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          xcode-select --install
           brew update
           brew install cmake
 
