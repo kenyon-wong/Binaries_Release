@@ -1,4 +1,4 @@
-name: Build MassDNS for Windows
+name: 🎉 Build MassDNS for Windows
 
 on:
   workflow_dispatch:
