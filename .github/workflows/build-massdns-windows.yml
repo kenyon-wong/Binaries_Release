@@ -28,7 +28,7 @@ jobs:
         run: |
           cd massdns
           mkdir bin
-          gcc -O3 -std=c11 -Wall -fstack-protector-strong src/main.c -o bin/massdns.exe
+          gcc -O3 -std=c11 -Wall -fstack-protector-strong -static src/main.c -o bin/massdns.exe -lwsock32
 
       - name: Upload Artifact
         uses: actions/upload-artifact@master
