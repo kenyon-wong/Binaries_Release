@@ -1,36 +1,36 @@
-name: Windows Build
+name: Build MassDNS for Windows
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_massdns:
     runs-on: windows-latest
 
     steps:
-      - name: 配置 Cygwin
+      - name: Install Cygwin
         uses: egor-tensin/setup-cygwin@v4
         with:
           packages: cmake gcc-g++
 
-      - name: Set Git line endings to Unix-style
+      - name: Set Git Line Endings to Unix-style
         run: git config --global core.autocrlf input
 
-      - name: 检查 Cygwin 的安装
+      - name: Check Cygwin Installation
         run: |
           ls.exe -Al
           pwd.exe
 
-      - name: 克隆仓库
+      - name: Clone Repository
         run: git clone https://github.com/blechschmidt/massdns.git
 
-      - name: 构建 massdns
+      - name: Build MassDNS
         run: |
           cd massdns
           mkdir bin
           gcc -O3 -std=c11 -Wall -fstack-protector-strong src/main.c -o bin/massdns.exe
 
-      - name: Upload artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
           name: massdns
