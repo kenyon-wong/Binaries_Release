@@ -20,6 +20,8 @@ jobs:
           # xcode-select --install
           brew update
           brew install cmake
+          brew install libuv
+          brew install openssl zlib
 
       - name: Build Massdns
         run: |
