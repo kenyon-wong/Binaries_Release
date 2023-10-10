@@ -1,0 +1,30 @@
+name: 🔨 Fscan_Binaries_Build
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Test Builds
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@master
+        with:
+          go-version: 1.18
+
+      - name: clone
+        run: |
+            git clone https://github.com/shadow1ng/fscan.git
+            
+      - name: Build
+        run: go build -o fscan_${{ matrix.os }} . 
+        working-directory: fscan
+
+      - name: Push changes
+        uses: actions/upload-artifact@master
+        with:
+          name: fscan_release
+          path: fscan/fscan_${{ matrix.os }}
