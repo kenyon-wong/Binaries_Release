@@ -1,25 +1,27 @@
-name: "CodeQL Analysis"
+name: "CodeQL"
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: '26 23 * * 3'
 
 jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    timeout-minutes: 360
     permissions:
+      security-events: write
       actions: read
       contents: read
-      security-events: write
+      packages: read
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Setup Java
       uses: actions/setup-java@v3
@@ -27,36 +29,33 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
-    # 初始化 CodeQL
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: java
+        queries: security-extended,security-and-quality
 
-    # 构建 Log4j 数据库
-    - name: Build CodeQL database
+    - name: Build Log4j Database
       run: |
         git clone https://github.com/apache/logging-log4j2.git
         cd logging-log4j2
         git checkout be881e5
-        # 修改 pom.xml 注释不需要的模块
         sed -i '/<module>log4j-layout-template-json/,/<\/modules>/s/^/<!-- /; s/$/ -->/' pom.xml
-        ${{ env.CODEQL_ACTION_HOME }}/codeql/codeql database create ../log4j-db --language=java --command="mvn clean install -Dmaven.test.skip=true"
+        mvn clean install -Dmaven.test.skip=true
         cd ..
 
-    # 分析数据库
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:java"
 
-    # 上传 CodeQL 数据库
     - name: Upload CodeQL database
       uses: actions/upload-artifact@v3
       with:
         name: codeql-database
-        path: log4j-db
+        path: ${{ github.workspace }}/results
 
-    # 上传 GitHub Action 环境内自动生成的所有 ql 规则
-    - name: Upload all CodeQL queries
+    - name: Upload CodeQL queries
       run: |
         CODEQL_QUERIES=$(find ${{ github.workspace }}/.github/codeql -name '*.ql')
         if [ -n "$CODEQL_QUERIES" ]; then
@@ -64,9 +63,8 @@ jobs:
           cp $CODEQL_QUERIES codeql-queries/
         else
           echo "No .ql files found in .github/codeql directory"
-          exit 0
         fi
-      
+
     - uses: actions/upload-artifact@v3
       with:
         name: codeql-queries
