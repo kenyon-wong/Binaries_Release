@@ -40,7 +40,9 @@ jobs:
         git clone https://github.com/apache/logging-log4j2.git
         cd logging-log4j2
         git checkout be881e5
-        sed -i '/<module>log4j-layout-template-json/,/<\/modules>/s/^/<!-- /; s/$/ -->/' pom.xml
+        # 使用 xmlstarlet 来修改 pom.xml，这样可以保证 XML 格式的正确性
+        sudo apt-get update && sudo apt-get install -y xmlstarlet
+        xmlstarlet ed -L -d "//module[text()='log4j-layout-template-json']" -d "//module[text()='log4j-core-its']" -d "//module[text()='log4j-1.2-api']" -d "//module[text()='log4j-slf4j-impl']" -d "//module[text()='log4j-slf4j18-impl']" -d "//module[text()='log4j-to-slf4j']" -d "//module[text()='log4j-jcl']" -d "//module[text()='log4j-flume-ng']" -d "//module[text()='log4j-taglib']" -d "//module[text()='log4j-jmx-gui']" -d "//module[text()='log4j-samples']" -d "//module[text()='log4j-bom']" -d "//module[text()='log4j-jdbc-dbcp2']" -d "//module[text()='log4j-jpa']" -d "//module[text()='log4j-couchdb']" -d "//module[text()='log4j-mongodb3']" -d "//module[text()='log4j-mongodb4']" -d "//module[text()='log4j-cassandra']" -d "//module[text()='log4j-web']" -d "//module[text()='log4j-perf']" -d "//module[text()='log4j-iostreams']" -d "//module[text()='log4j-jul']" -d "//module[text()='log4j-jpl']" -d "//module[text()='log4j-liquibase']" -d "//module[text()='log4j-appserver']" -d "//module[text()='log4j-osgi']" -d "//module[text()='log4j-docker']" -d "//module[text()='log4j-kubernetes']" -d "//module[text()='log4j-spring-boot']" -d "//module[text()='log4j-spring-cloud-config']" pom.xml
         mvn clean install -Dmaven.test.skip=true
         cd ..
 
