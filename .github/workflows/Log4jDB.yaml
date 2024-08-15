@@ -24,7 +24,7 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@v3
       with:
-        java-version: '11'  # 使用 Java 11，这样就不需要特殊的 Maven 配置
+        java-version: '11'
         distribution: 'temurin'
 
     # 初始化 CodeQL
@@ -41,7 +41,7 @@ jobs:
         git checkout be881e5
         # 修改 pom.xml 注释不需要的模块
         sed -i '/<module>log4j-layout-template-json/,/<\/modules>/s/^/<!-- /; s/$/ -->/' pom.xml
-        codeql database create ../log4j-db --language=java --command="mvn clean install -Dmaven.test.skip=true"
+        ${{ env.CODEQL_ACTION_HOME }}/codeql/codeql database create ../log4j-db --language=java --command="mvn clean install -Dmaven.test.skip=true"
         cd ..
 
     # 分析数据库
