@@ -12,9 +12,6 @@ jobs:
       shell: pwsh # For Linux, use bash
       run: |
         mkdir "C:\00PackageManager\"
-        mkdir "C:\00PackageManager\BurpExtender\"
-        mkdir "C:\Workstation"
-        mkdir "C:\01Sync\Sync\Zotero"
         $env:SCOOP='C:\00PackageManager\Scoop'
         [Environment]::SetEnvironmentVariable('SCOOP', $env:SCOOP, 'User')
         Set-ExecutionPolicy RemoteSigned -scope CurrentUser
@@ -24,6 +21,7 @@ jobs:
         scoop bucket add versions
         scoop bucket add java
         scoop bucket add nonportable
+        scoop bucket add ktools https://github.com/kenyon-wong/ktools
         scoop install aria2 sudo
         scoop config aria2-warning-enabled false
         scoop config aria2-enabled true
@@ -33,7 +31,6 @@ jobs:
         scoop config aria2-min-split-size 4M
         scoop install 7zip
         scoop install apktool
-        scoop install aria2
         scoop install autocorrect
         scoop install base64
         scoop install biome
@@ -48,8 +45,10 @@ jobs:
         scoop install exiftool
         scoop install ffmpeg
         scoop install ffuf
+        scoop install firefox
         scoop install gawk
         scoop install git
+        scoop install googlechrome
         scoop install gradle
         scoop install grep
         scoop install idea-ultimate
@@ -62,7 +61,6 @@ jobs:
         scoop install liberica11-full-jdk
         scoop install liberica17-full-jdk
         scoop install maven
-        scoop install mvndaemon
         scoop install netspy
         scoop install nodejs-lts-np
         scoop install onefetch
@@ -76,20 +74,23 @@ jobs:
         scoop install python27
         scoop install renamer
         scoop install sed
+        scoop install snipaste
         scoop install sqlitestudio
         scoop install sslscan
-        scoop install sudo
+        scoop install sublime-text
         scoop install sysinternals
         scoop install TrafficMonitor
         scoop install vim
         scoop install vncviewer
         scoop install vscode
         scoop install wget
+        scoop install windowsdesktop-runtime-lts
         scoop install xpoc
         scoop install yq
-        scoop install firefox
-        scoop install snipaste
-        scoop install sublime-text
-        scoop install windowsdesktop-runtime-lts
-        scoop install googlechrome
+        scoop cache rm *
 
+    - name: Upload CodeQL database
+      uses: actions/upload-artifact@v3
+      with:
+        name: Scoop-00PackageManager
+        path: C:\00PackageManager\
