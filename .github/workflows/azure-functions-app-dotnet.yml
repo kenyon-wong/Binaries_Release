@@ -1,0 +1,95 @@
+name: Deploy DotNet project to Azure Function App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest # For Linux, use ubuntu-latest
+    environment: dev
+    steps:
+    - name: 'Resolve Project Dependencies Using Dotnet'
+      shell: pwsh # For Linux, use bash
+      run: |
+        mkdir "C:\00PackageManager\"
+        mkdir "C:\00PackageManager\BurpExtender\"
+        mkdir "C:\Workstation"
+        mkdir "C:\01Sync\Sync\Zotero"
+        $env:SCOOP='C:\00PackageManager\Scoop'
+        [Environment]::SetEnvironmentVariable('SCOOP', $env:SCOOP, 'User')
+        Set-ExecutionPolicy RemoteSigned -scope CurrentUser
+        iwr -useb get.scoop.sh | iex
+        scoop bucket add extras
+        scoop bucket add nirsoft
+        scoop bucket add versions
+        scoop bucket add java
+        scoop bucket add nonportable
+        scoop install aria2 sudo
+        scoop config aria2-warning-enabled false
+        scoop config aria2-enabled true
+        scoop config aria2-retry-wait 4
+        scoop config aria2-split 16
+        scoop config aria2-max-connection-per-server 16
+        scoop config aria2-min-split-size 4M
+        scoop install 7zip
+        scoop install apktool
+        scoop install aria2
+        scoop install autocorrect
+        scoop install base64
+        scoop install biome
+        scoop install burp-suite-pro-np
+        scoop install cacert
+        scoop install codeql
+        scoop install curl
+        scoop install cwrsync
+        scoop install dismplusplus
+        scoop install dupeGuru
+        scoop install eclipse-mat
+        scoop install exiftool
+        scoop install ffmpeg
+        scoop install ffuf
+        scoop install gawk
+        scoop install git
+        scoop install gradle
+        scoop install grep
+        scoop install idea-ultimate
+        scoop install jadx
+        scoop install jenv
+        scoop install jq
+        scoop install keepassxc
+        scoop install kubectl
+        scoop install liberica-full-jdk
+        scoop install liberica11-full-jdk
+        scoop install liberica17-full-jdk
+        scoop install maven
+        scoop install mvndaemon
+        scoop install netspy
+        scoop install nodejs-lts-np
+        scoop install onefetch
+        scoop install openark
+        scoop install openssl
+        scoop install pandoc
+        scoop install pdfpatcher
+        scoop install pixpin
+        scoop install powertoys
+        scoop install python
+        scoop install python27
+        scoop install renamer
+        scoop install sed
+        scoop install sqlitestudio
+        scoop install sslscan
+        scoop install sudo
+        scoop install sysinternals
+        scoop install TrafficMonitor
+        scoop install vim
+        scoop install vncviewer
+        scoop install vscode
+        scoop install wget
+        scoop install xpoc
+        scoop install yq
+        scoop install firefox
+        scoop install snipaste
+        scoop install sublime-text
+        scoop install windowsdesktop-runtime-lts
+        scoop install googlechrome
+
