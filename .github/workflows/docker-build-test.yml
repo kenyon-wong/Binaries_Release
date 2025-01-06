@@ -21,17 +21,23 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t my-node-app .
-          # 你可以在此处添加构建优化选项，例如缓存或平台指定
+          docker buildx build --pull --cache-from type=registry -t my-node-app .
+          # --pull ensures we get the latest base images
+          # --cache-from type=registry enables build cache from registry
 
       - name: Run Docker container
         run: |
           docker run -d --name my-node-container my-node-app
-          sleep 10  # 等待应用启动
+          # Wait for the application to start
+          until docker logs my-node-container 2>&1 | grep -q "Ready to serve"; do sleep 1; done
+          # Replace "Ready to serve" with an actual log message from your app
 
       - name: Test app
         run: |
-          response=$(docker exec my-node-container curl -fs http://localhost:3000/healthz)
+          # Get the IP address of the container
+          ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' my-node-container)
+          # Use curl to hit the health check endpoint
+          response=$(curl -fs http://$ip:3000/healthz)
           if [ -z "$response" ]; then
             echo "App health check failed."
             exit 1
