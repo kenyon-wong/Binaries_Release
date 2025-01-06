@@ -1,0 +1,45 @@
+name: Docker Build and Test
+
+on:
+  push:
+    branches:
+      - main  # 你可以根据需要更改分支
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2  # 使用最新版本的 Checkout 动作
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3.8.0  # 使用指定版本的 Setup Buildx 动作
+        with:
+          install: true  # 将 docker build 命令设置为 docker buildx build 的别名
+
+      - name: Build Docker image
+        run: |
+          docker build -t my-node-app .
+          # 你可以在此处添加构建优化选项，例如缓存或平台指定
+
+      - name: Run Docker container
+        run: |
+          docker run -d --name my-node-container my-node-app
+          sleep 10  # 等待应用启动
+
+      - name: Test app
+        run: |
+          response=$(docker exec my-node-container curl -fs http://localhost:3000/healthz)
+          if [ -z "$response" ]; then
+            echo "App health check failed."
+            exit 1
+          else
+            echo "App is healthy."
+          fi
+
+      - name: Clean up
+        run: |
+          docker stop my-node-container
+          docker rm my-node-container
